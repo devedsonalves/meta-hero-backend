@@ -1,0 +1,54 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Logs
+logs/
+*.log
+*.log.*
+debug.log
+
+# Build outputs
+dist/
+build/
+
+# Environment variables
+.env
+.env.*.local
+
+# Prisma
+prisma/*.db
+prisma/.env
+prisma/migrations/
+
+# Test coverage
+coverage/
+
+# IDE and Editor settings
+.idea/
+.DS_Store
+*.swp
+*.swo
+*.code-workspace
+.vscode
+
+# OS-specific files
+Thumbs.db
+*.iml
+
+# Lint cache
+.eslintcache
+
+# Prettier
+.prettierignore
+
+# Jest
+.jest/
+*.test-results.json
+
+# TypeScript
+*.tsbuildinfo
+tsconfig.tsbuildinfo

@@ -1,0 +1,20 @@
+version: '1.0'
+
+services:
+  api:
+    container_name: meta-hero-api
+    build:
+      context: .
+      target: dev
+    ports:
+      - '${API_PORT}:${API_PORT}'
+    volumes:
+      - ./src:/app/src
+    env_file:
+      - .env
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
