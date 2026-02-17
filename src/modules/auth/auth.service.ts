@@ -2,7 +2,7 @@ import { AppError } from '@/core/errors/app-error'
 import { UserRepository } from '../users/user.repository'
 import { IUser, IUserRepository } from '../users/user.types'
 import { PasswordHash } from '@/shared/utils/password-hash'
-import { createHash, randomBytes } from 'crypto'
+import { createHash, randomBytes, randomUUID } from 'crypto'
 import { IAuthRepository, IGoogleUserProfile } from './auth.types'
 import { AuthRepository } from './auth.repository'
 
@@ -22,6 +22,7 @@ export class AuthService {
     }
 
     const isPasswordValid = await PasswordHash.compare(password, user.password)
+
     if (!isPasswordValid) {
       throw new AppError('E-mail or password is incorrect', 401)
     }
@@ -30,7 +31,9 @@ export class AuthService {
       id: user.id,
       name: user.name,
       email: user.email,
-      authProvider: user.authProvider
+      authProvider: user.authProvider,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt
     }
   }
 
@@ -100,9 +103,12 @@ export class AuthService {
     }
 
     const newUser = await this.userRepository.save({
+      id: randomUUID(),
       name,
       email,
-      authProvider: 'google'
+      authProvider: 'google',
+      createdAt: new Date(),
+      updatedAt: new Date()
     })
     return newUser
   }

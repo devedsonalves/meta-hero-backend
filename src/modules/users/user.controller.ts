@@ -1,4 +1,4 @@
-import { FastifyReply, FastifyRequest } from 'fastify'
+import { FastifyRequest } from 'fastify'
 import { UserService } from './user.service'
 import { IUser } from './user.types'
 import { CreateUserInput } from './user.schema'

@@ -17,9 +17,3 @@ COPY --from=build /app/dist ./dist
 COPY --from=build /app/prisma ./prisma
 EXPOSE 3000
 CMD ["npm", "run", "start"]
-
-FROM dependencies AS dev
-COPY . .
-RUN npx prisma generate
-EXPOSE 3000
-CMD ["npm", "run", "dev"]

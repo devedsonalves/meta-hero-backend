@@ -48,7 +48,7 @@ export class UserRepository implements IUserRepository {
       if (!user) return null
 
       if (!returnPassword) {
-        const { password: _, ...userWithoutPassword } = user
+        const { ...userWithoutPassword } = user
         return userWithoutPassword as IUser
       }
 
@@ -66,7 +66,7 @@ export class UserRepository implements IUserRepository {
 
       if (!user) return null
 
-      const { password: _, ...userWithoutPassword } = user
+      const { ...userWithoutPassword } = user
       return userWithoutPassword as IUser
     } catch (error) {
       throw new Error('Error finding user by ID: ' + error)

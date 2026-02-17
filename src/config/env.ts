@@ -1,6 +1,6 @@
-import { z } from 'zod/v4';
-import dotenv from 'dotenv';
-dotenv.config();
+import { z } from 'zod/v4'
+import dotenv from 'dotenv'
+dotenv.config()
 
 const envSchema = z.object({
   NODE_ENV: z.string().default('development'),
@@ -13,6 +13,6 @@ const envSchema = z.object({
   GOOGLE_CLIENT_SECRET: z.string().default(''),
   GOOGLE_CALLBACK_URL: z.string().default(''),
   FRONTEND_URL: z.string().default('http://localhost:5173')
-});
+})
 
-export const env = envSchema.parse(process.env);
+export const env = envSchema.parse(process.env)

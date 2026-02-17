@@ -56,6 +56,7 @@ async function authPlugin(server: FastifyInstance, options: AuthPluginOptions) {
 }
 
 export default fastifyPlugin(authPlugin)
+
 declare module 'fastify' {
   interface FastifyInstance {
     config: {

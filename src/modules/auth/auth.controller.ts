@@ -147,7 +147,7 @@ export class AuthController {
 
       reply.setAuthCookies({ accessToken, refreshToken })
 
-      return reply.redirect(env.FRONTEND_URL || '/')
+      return reply.redirect(`${env.FRONTEND_URL}/dashboard`)
     } catch {
       return reply.redirect(`${env.FRONTEND_URL}/login?error=oauth_failed`)
     }
