@@ -1,16 +1,33 @@
-import { pgTable, text, timestamp, boolean } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
+import {
+  pgTable,
+  text,
+  timestamp,
+  varchar,
+  boolean,
+  numeric,
+  date
+} from 'drizzle-orm/pg-core'
 
 export const users = pgTable('users', {
   id: text('id')
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  name: text('name').notNull(),
-  email: text('email').notNull().unique(),
+  name: varchar('name', { length: 255 }).notNull(),
+  email: varchar('email', { length: 255 }).notNull().unique(),
   password: text('password'),
-  authProvider: text('auth_provider').notNull().default('local'),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull()
+  authProvider: varchar('auth_provider', { length: 20 })
+    .notNull()
+    .default('local'),
+  isActive: boolean('is_active').notNull().default(true),
+  xp: numeric('xp', { precision: 10, scale: 2 }).notNull().default('0'),
+  level: numeric('level', { precision: 10, scale: 2 }).notNull().default('1'),
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
+    .notNull()
+    .defaultNow()
 })
 
 export const refreshTokens = pgTable('refresh_tokens', {
@@ -22,6 +39,22 @@ export const refreshTokens = pgTable('refresh_tokens', {
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
   revoked: boolean('revoked').notNull().default(false),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull()
+})
+
+export const transactions = pgTable('transactions', {
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text('user_id')
+    .references(() => users.id)
+    .notNull(),
+  type: text('type').notNull(),
+  category: text('category').notNull(),
+  value: numeric('value', { precision: 10, scale: 2 }).notNull(),
+  date: date('date').notNull(),
+  description: text('description'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull()
 })

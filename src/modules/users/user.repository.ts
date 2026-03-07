@@ -22,15 +22,8 @@ export class UserRepository implements IUserRepository {
           password: password || null,
           authProvider: authProvider || 'local'
         })
-        .returning({
-          id: users.id,
-          name: users.name,
-          email: users.email,
-          authProvider: users.authProvider,
-          createdAt: users.createdAt,
-          updatedAt: users.updatedAt
-        })
-      return user
+        .returning()
+      return user as IUser
     } catch (error) {
       throw new Error('Error saving user to database: ' + error)
     }
@@ -106,15 +99,8 @@ export class UserRepository implements IUserRepository {
           updatedAt: new Date()
         })
         .where(eq(users.id, id))
-        .returning({
-          id: users.id,
-          name: users.name,
-          email: users.email,
-          authProvider: users.authProvider,
-          createdAt: users.createdAt,
-          updatedAt: users.updatedAt
-        })
-      return updatedUser
+        .returning()
+      return updatedUser as IUser
     } catch (error) {
       throw new Error('Error updating user: ' + error)
     }
