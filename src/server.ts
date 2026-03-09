@@ -4,9 +4,10 @@ import { errorHandler } from '@/core/errors/error-handler'
 import { AuthRoutes } from '@/modules/auth/auth.routes'
 import { TransactionRoutes } from '@/modules/transactions/transaction.routes'
 import { UserRoutes } from '@/modules/users/user.routes'
+import { DashboardRoutes } from '@/modules/dashboard/dashboard.routes'
 
 export const app = new App({
-  routes: [UserRoutes, AuthRoutes, TransactionRoutes]
+  routes: [UserRoutes, AuthRoutes, TransactionRoutes, DashboardRoutes]
 })
 
 errorHandler(app.getApp())
