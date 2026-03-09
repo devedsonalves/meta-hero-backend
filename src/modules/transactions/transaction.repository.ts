@@ -101,7 +101,7 @@ export class TransactionRepository implements ITransactionRepository {
     data: Partial<Omit<ITransaction, 'id' | 'userId' | 'createdAt'>>
   ): Promise<ITransaction> {
     try {
-      const updateData: any = { ...data }
+      const updateData: Record<string, unknown> = { ...data }
       if (data.value) updateData.value = data.value.toString()
       if (data.date) {
         updateData.date =
