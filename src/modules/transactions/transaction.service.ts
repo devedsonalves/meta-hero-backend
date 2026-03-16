@@ -5,12 +5,15 @@ import {
   ITransactionFilters
 } from './transaction.types'
 import { TransactionRepository } from './transaction.repository'
+import { AutomationService } from '../missions/automation.service'
 
 export class TransactionService {
   private repository: ITransactionRepository
+  private automationService: AutomationService
 
   constructor() {
     this.repository = new TransactionRepository()
+    this.automationService = new AutomationService()
   }
 
   public async create(
@@ -21,6 +24,10 @@ export class TransactionService {
       ...data,
       userId
     })
+
+    // Trigger automation in background/after save
+    void this.automationService.handleTransactionChange(userId)
+
     return transaction
   }
 
@@ -63,6 +70,10 @@ export class TransactionService {
     }
 
     const updatedTransaction = await this.repository.update(id, userId, data)
+
+    // Trigger automation
+    void this.automationService.handleTransactionChange(userId)
+
     return updatedTransaction
   }
 }

@@ -83,6 +83,26 @@ export class UserRoutes {
       async (_request, _reply) => await this.controller.findAll()
     )
 
+    fastifyWithZod.get(
+      '/me',
+      {
+        preHandler: [fastify.authenticate],
+        schema: {
+          summary: 'Get current user',
+          description: 'Returns the details of the currently logged in user.',
+          tags: ['Users'],
+          response: {
+            200: z.object({
+              message: z.string().describe('Success message'),
+              data: userSchema.describe('The current user object')
+            }),
+            401: messageSchema
+          }
+        }
+      },
+      async (request, _reply) => await this.controller.getMe(request)
+    )
+
     fastifyWithZod.delete(
       '/:id',
       {
