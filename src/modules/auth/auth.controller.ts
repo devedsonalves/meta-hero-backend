@@ -107,6 +107,10 @@ export class AuthController {
       id: user.id,
       name: user.name,
       email: user.email,
+      authProvider: user.authProvider,
+      xp: user.xp,
+      level: user.level,
+      heroCoins: user.heroCoins,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt
     })

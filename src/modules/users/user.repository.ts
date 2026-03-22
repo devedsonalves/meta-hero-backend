@@ -12,7 +12,9 @@ export class UserRepository implements IUserRepository {
     this.db = DatabaseConnection.getInstance().getClient()
   }
 
-  async save({ name, email, password, authProvider }: IUser): Promise<IUser> {
+  async save(userData: IUser): Promise<IUser> {
+    const { name, email, password, authProvider, xp, level, heroCoins } =
+      userData
     try {
       const [user] = await this.db
         .insert(users)
@@ -20,10 +22,13 @@ export class UserRepository implements IUserRepository {
           name,
           email,
           password: password || null,
-          authProvider: authProvider || 'local'
+          authProvider: authProvider || 'local',
+          xp: xp || 0,
+          level: level || 1,
+          heroCoins: heroCoins || 0
         })
         .returning()
-      return user as IUser
+      return user as unknown as IUser
     } catch (error) {
       throw new Error('Error saving user to database: ' + error)
     }
@@ -84,7 +89,7 @@ export class UserRepository implements IUserRepository {
   }
 
   async update(user: IUser): Promise<IUser> {
-    const { id, name, email, password } = user
+    const { id, name, email, password, xp, level, heroCoins } = user
     if (!id) {
       throw new Error('User ID is required for update')
     }
@@ -96,11 +101,14 @@ export class UserRepository implements IUserRepository {
           name,
           email,
           password: password || undefined,
+          xp,
+          level,
+          heroCoins,
           updatedAt: new Date()
         })
         .where(eq(users.id, id))
         .returning()
-      return updatedUser as IUser
+      return updatedUser as unknown as IUser
     } catch (error) {
       throw new Error('Error updating user: ' + error)
     }

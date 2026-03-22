@@ -21,8 +21,9 @@ export const users = pgTable('users', {
     .notNull()
     .default('local'),
   isActive: boolean('is_active').notNull().default(true),
-  xp: numeric('xp', { precision: 10, scale: 2 }).notNull().default('0'),
-  level: numeric('level', { precision: 10, scale: 2 }).notNull().default('1'),
+  xp: integer('xp').notNull().default(0),
+  level: integer('level').notNull().default(1),
+  heroCoins: integer('hero_coins').notNull().default(0),
   createdAt: timestamp('created_at', { withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -97,7 +98,9 @@ export const missions = pgTable('missions', {
   ),
   targetCategory: varchar('target_category'),
   xpReward: integer('xp_reward').notNull().default(10),
+  coinReward: integer('coin_reward').notNull().default(0),
   isGlobal: boolean('is_global').notNull().default(true),
+  imageUrl: varchar('image_url', { length: 255 }),
   createdAt: timestamp('created_at', { withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -127,6 +130,35 @@ export const userMissions = pgTable('user_missions', {
     .defaultNow()
 })
 
+export const achievements = pgTable('achievements', {
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  name: varchar('name', { length: 255 }).notNull(),
+  description: text('description').notNull(),
+  xpReward: integer('xp_reward').notNull().default(50),
+  coinReward: integer('coin_reward').notNull().default(10),
+  icon: varchar('icon', { length: 255 }),
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .notNull()
+    .defaultNow()
+})
+
+export const userAchievements = pgTable('user_achievements', {
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text('user_id')
+    .references(() => users.id, { onDelete: 'cascade' })
+    .notNull(),
+  achievementId: text('achievement_id')
+    .references(() => achievements.id, { onDelete: 'cascade' })
+    .notNull(),
+  unlockedAt: timestamp('unlocked_at', { withTimezone: true })
+    .notNull()
+    .defaultNow()
+})
+
 export const rewards = pgTable('rewards', {
   id: text('id')
     .primaryKey()
@@ -135,6 +167,7 @@ export const rewards = pgTable('rewards', {
   description: text('description').notNull(),
   cost: numeric('cost', { precision: 10, scale: 2 }).notNull(),
   icon: varchar('icon', { length: 255 }),
+  imageUrl: varchar('image_url', { length: 255 }),
   createdAt: timestamp('created_at', { withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -162,7 +195,8 @@ export const usersRelations = relations(users, ({ many }) => ({
   refreshTokens: many(refreshTokens),
   goals: many(goals),
   userMissions: many(userMissions),
-  userRewards: many(userRewards)
+  userRewards: many(userRewards),
+  userAchievements: many(userAchievements)
 }))
 
 export const refreshTokensRelations = relations(refreshTokens, ({ one }) => ({
@@ -193,6 +227,24 @@ export const userMissionsRelations = relations(userMissions, ({ one }) => ({
     references: [missions.id]
   })
 }))
+
+export const achievementsRelations = relations(achievements, ({ many }) => ({
+  userAchievements: many(userAchievements)
+}))
+
+export const userAchievementsRelations = relations(
+  userAchievements,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [userAchievements.userId],
+      references: [users.id]
+    }),
+    achievement: one(achievements, {
+      fields: [userAchievements.achievementId],
+      references: [achievements.id]
+    })
+  })
+)
 
 export const rewardsRelations = relations(rewards, ({ many }) => ({
   userRewards: many(userRewards)

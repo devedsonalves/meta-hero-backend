@@ -12,6 +12,12 @@ export class AutomationService {
     this.progressService = new UserProgressService()
   }
 
+  // Type helper for mission joined with userMission
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private missionOf(um: any): any {
+    return um.mission
+  }
+
   /**
    * Main entry point called after any transaction change
    */
@@ -19,6 +25,9 @@ export class AutomationService {
     const db = DatabaseConnection.getInstance().getClient()
 
     await db.transaction(async (tx) => {
+      // 0. Award basic XP for the transaction (+5 XP as per PRODUCT.md)
+      await this.progressService.addXpToUserTx(tx, userId, 5)
+
       // 1. Update Linked Goals
       await this.syncGoalsProgress(tx, userId)
 
@@ -70,9 +79,11 @@ export class AutomationService {
         })
         .where(eq(goals.id, goal.id))
 
-      // If just achieved, we could eventually reward XP here too
+      // If just achieved, award XP as per PRODUCT.md (+100 XP)
       if (newStatus === 'achieved' && goal.status === 'active') {
-        await this.progressService.addXpToUserTx(tx, userId, 100) // Bonus for goal achievement
+        await this.progressService.addXpToUserTx(tx, userId, 100)
+        // Also award Hero Coins for goal completion? (Optional but recommended)
+        await this.progressService.addCoinsToUserTx(tx, userId, 50)
       }
     }
   }
@@ -97,12 +108,13 @@ export class AutomationService {
     })
 
     for (const um of activeUserMissions) {
-      if (!um.mission) continue
+      const mission = this.missionOf(um)
+      if (!mission) continue
 
       let currentProgress = um.progress
       let shouldComplete = false
 
-      switch (um.mission.type) {
+      switch (mission.type) {
         case 'transaction_count': {
           const [txCount] = await tx
             .select({ val: count() })
@@ -112,7 +124,7 @@ export class AutomationService {
           currentProgress = Math.min(
             100,
             Math.round(
-              (Number(txCount.val) / Number(um.mission.targetValue || 1)) * 100
+              (Number(txCount.val) / Number(mission.targetValue || 1)) * 100
             )
           )
           shouldComplete = currentProgress >= 100
@@ -133,7 +145,7 @@ export class AutomationService {
           const saved = Number(totalSaved.total || 0)
           currentProgress = Math.min(
             100,
-            Math.round((saved / Number(um.mission.targetValue || 1)) * 100)
+            Math.round((saved / Number(mission.targetValue || 1)) * 100)
           )
           shouldComplete = currentProgress >= 100
           break
@@ -141,7 +153,6 @@ export class AutomationService {
 
         case 'category_limit':
           // Logic for "Spend less than X in Y category"
-          // This would usually be checked at end of month, or dynamically valid
           break
       }
 
@@ -156,11 +167,21 @@ export class AutomationService {
           .where(eq(userMissions.id, um.id))
 
         if (shouldComplete && um.status !== 'completed') {
+          // Award XP
           await this.progressService.addXpToUserTx(
             tx,
             userId,
-            Number(um.mission.xpReward || 0)
+            Number(mission.xpReward || 0)
           )
+
+          // Award Hero Coins
+          if (mission.coinReward && Number(mission.coinReward) > 0) {
+            await this.progressService.addCoinsToUserTx(
+              tx,
+              userId,
+              Number(mission.coinReward)
+            )
+          }
         }
       }
     }

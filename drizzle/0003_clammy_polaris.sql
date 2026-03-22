@@ -1,0 +1,1 @@
+ALTER TABLE "rewards" ADD COLUMN "image_url" varchar(255);

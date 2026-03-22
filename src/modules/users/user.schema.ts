@@ -7,6 +7,9 @@ export const userSchema = z.object({
   authProvider: z
     .string()
     .describe('Authentication provider (local, google, etc.)'),
+  xp: z.number().describe('User experience points'),
+  level: z.number().describe('User level'),
+  heroCoins: z.number().describe('User hero coins balance'),
   createdAt: z.date().describe('Account creation date'),
   updatedAt: z.date().describe('Last account update date')
 })

@@ -6,9 +6,10 @@ import {
   missions,
   userMissions,
   transactions,
-  rewards
+  rewards,
+  achievements
 } from './schema'
-import { eq, sql, and } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 import bcrypt from 'bcrypt'
 
 async function seed() {
@@ -33,21 +34,28 @@ async function seed() {
           name: 'Edson',
           email: userEmail,
           password: hashedPassword,
-          xp: '150',
-          level: '5'
+          xp: 150,
+          level: 2,
+          heroCoins: 50
         })
         .returning()
       user = newUser
       console.log('✅ User created.')
     } else {
-      console.log('✅ User already exists.')
+      console.log('✅ User already exists. Updating initial stats...')
+      const [updatedUser] = await db
+        .update(users)
+        .set({
+          xp: 150,
+          level: 2,
+          heroCoins: 50
+        })
+        .where(eq(users.email, userEmail))
+        .returning()
+      user = updatedUser
     }
 
     const userId = user.id
-
-    // 2. Clear some existing data for this user to avoid duplicates if re-running
-    // (Optional: depending on whether you want to stack data or start fresh)
-    // For this seed, we'll just add new data.
 
     // 3. Goals
     console.log('🎯 Seeding goals...')
@@ -105,7 +113,10 @@ async function seed() {
         type: 'saving',
         targetValue: '100.00',
         xpReward: 50,
-        isGlobal: true
+        coinReward: 10,
+        isGlobal: true,
+        imageUrl:
+          'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?q=80&w=400&h=400&fit=crop'
       },
       {
         title: 'Analista de Gastos',
@@ -114,7 +125,10 @@ async function seed() {
         type: 'transaction_count',
         targetValue: '10',
         xpReward: 100,
-        isGlobal: true
+        coinReward: 25,
+        isGlobal: true,
+        imageUrl:
+          'https://images.unsplash.com/photo-1554224155-6726b3ff858f?q=80&w=400&h=400&fit=crop'
       },
       {
         title: 'Mestre do Orçamento',
@@ -123,7 +137,10 @@ async function seed() {
         type: 'transaction_count',
         targetValue: '50',
         xpReward: 500,
-        isGlobal: true
+        coinReward: 100,
+        isGlobal: true,
+        imageUrl:
+          'https://images.unsplash.com/photo-1454165833767-1306e1499021?q=80&w=400&h=400&fit=crop'
       }
     ]
 
@@ -169,14 +186,6 @@ async function seed() {
     // 6. Transactions
     console.log('💰 Seeding transactions...')
 
-    // Fix existing wrong records if any
-    await db.execute(
-      sql`UPDATE transactions SET type = 'receita' WHERE type = 'income'`
-    )
-    await db.execute(
-      sql`UPDATE transactions SET type = 'despesa' WHERE type = 'expense'`
-    )
-
     const transactionData = [
       {
         userId,
@@ -215,18 +224,13 @@ async function seed() {
     ]
 
     for (const tx of transactionData) {
-      // Check if similar transaction exists to avoid duplicates on multiple seeds
-      const [existing] = await db
-        .select()
-        .from(transactions)
-        .where(
-          and(
-            eq(transactions.userId, userId),
-            eq(transactions.description, tx.description),
-            eq(transactions.value, tx.value)
-          )
+      const existing = await db.query.transactions.findFirst({
+        where: and(
+          eq(transactions.userId, userId),
+          eq(transactions.description, tx.description),
+          eq(transactions.value, tx.value)
         )
-        .limit(1)
+      })
 
       if (!existing) {
         await db.insert(transactions).values(tx as any)
@@ -240,13 +244,33 @@ async function seed() {
         name: 'Selo de Herói de Bronze',
         description: 'Concedido por completar suas primeiras 5 missões.',
         cost: '100.00',
-        icon: 'Shield'
+        icon: 'Shield',
+        imageUrl:
+          'https://images.unsplash.com/photo-1599420186946-7b6fb4e297f0?q=80&w=400&h=400&fit=crop'
       },
       {
         name: 'Tema Dark Gold',
         description: 'Uma interface personalizada para usuários avançados.',
         cost: '500.00',
-        icon: 'Palette'
+        icon: 'Palette',
+        imageUrl:
+          'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=400&h=400&fit=crop'
+      },
+      {
+        name: 'Avatar: Guardião do Tesouro',
+        description: 'Um avatar exclusivo para seu perfil.',
+        cost: '250.00',
+        icon: 'User',
+        imageUrl:
+          'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=400&h=400&fit=crop'
+      },
+      {
+        name: 'Planilha Mestra Premium',
+        description: 'Ferramenta avançada para controle de dividendos.',
+        cost: '1000.00',
+        icon: 'Table',
+        imageUrl:
+          'https://images.unsplash.com/photo-1543286386-713bcd549661?q=80&w=400&h=400&fit=crop'
       }
     ]
 
@@ -256,6 +280,46 @@ async function seed() {
       })
       if (!existing) {
         await db.insert(rewards).values(reward as any)
+      } else {
+        await db
+          .update(rewards)
+          .set(reward as any)
+          .where(eq(rewards.id, existing.id))
+      }
+    }
+
+    // 8. Achievements
+    console.log('🏅 Seeding achievements...')
+    const achievementData = [
+      {
+        name: 'Primeira de Muitas',
+        description: 'Registrou sua primeira despesa.',
+        xpReward: 50,
+        coinReward: 10,
+        icon: 'Star'
+      },
+      {
+        name: 'Planejador Heróico',
+        description: 'Criou sua primeira meta financeira.',
+        xpReward: 50,
+        coinReward: 10,
+        icon: 'Target'
+      },
+      {
+        name: 'Mão de Vaca de Ouro',
+        description: 'Economizou 1000 reais no total.',
+        xpReward: 200,
+        coinReward: 50,
+        icon: 'Coins'
+      }
+    ]
+
+    for (const ach of achievementData) {
+      const existing = await db.query.achievements.findFirst({
+        where: eq(achievements.name, ach.name)
+      })
+      if (!existing) {
+        await db.insert(achievements).values(ach as any)
       }
     }
 

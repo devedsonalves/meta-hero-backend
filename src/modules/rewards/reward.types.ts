@@ -4,6 +4,7 @@ export interface IReward {
   description: string
   cost: number | string
   icon: string | null
+  imageUrl?: string | null
   createdAt: Date
   updatedAt: Date
 }

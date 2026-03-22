@@ -4,7 +4,8 @@ export const createRewardSchema = z.object({
   name: z.string().min(1),
   description: z.string().min(1),
   cost: z.number().positive(),
-  icon: z.string().optional()
+  icon: z.string().optional(),
+  imageUrl: z.string().url().optional()
 })
 
 export const rewardIdSchema = z.object({
@@ -17,6 +18,7 @@ export const rewardSchema = z.object({
   description: z.string(),
   cost: z.union([z.string(), z.number()]),
   icon: z.string().nullable(),
+  imageUrl: z.string().nullable().optional(),
   createdAt: z.union([z.string(), z.date()]),
   updatedAt: z.union([z.string(), z.date()])
 })
