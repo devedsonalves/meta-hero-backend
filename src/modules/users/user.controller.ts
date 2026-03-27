@@ -46,6 +46,18 @@ export class UserController {
     }
   }
 
+  public async getMe(
+    request: FastifyRequest
+  ): Promise<{ message: string; data: IUser }> {
+    const userId = (request.user as { sub: string }).sub
+    const user = await this.service.findById(userId)
+
+    return {
+      message: 'User found successfully',
+      data: user
+    }
+  }
+
   public async deleteById(
     request: FastifyRequest
   ): Promise<{ message: string }> {

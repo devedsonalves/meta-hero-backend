@@ -32,6 +32,9 @@ export class AuthService {
       name: user.name,
       email: user.email,
       authProvider: user.authProvider,
+      xp: Number(user.xp),
+      level: Number(user.level),
+      heroCoins: Number(user.heroCoins),
       createdAt: user.createdAt,
       updatedAt: user.updatedAt
     }
@@ -107,6 +110,9 @@ export class AuthService {
       name,
       email,
       authProvider: 'google',
+      xp: 0,
+      level: 1,
+      heroCoins: 0,
       createdAt: new Date(),
       updatedAt: new Date()
     })

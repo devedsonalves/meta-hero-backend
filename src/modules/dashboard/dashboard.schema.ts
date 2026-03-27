@@ -43,7 +43,9 @@ export const dashboardResponseSchema = z.object({
   goalProgress: goalProgressSchema,
   missionHistory: chartDataSchema,
   expensesSummary: expensesSummarySchema,
-  byCategory: chartDataSchema
+  byCategory: chartDataSchema,
+  goals: z.array(z.any()),
+  missions: z.array(z.any())
 })
 
 export type DashboardResponseOutput = z.infer<typeof dashboardResponseSchema>

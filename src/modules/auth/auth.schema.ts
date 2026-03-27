@@ -20,6 +20,9 @@ export const userResponseSchema = z.object({
   id: z.string().describe('User unique identifier'),
   name: z.string().describe('User full name'),
   email: z.string().email().describe('User email'),
+  xp: z.number().describe('User experience points'),
+  level: z.number().describe('User level'),
+  heroCoins: z.number().describe('User hero coins balance'),
   createdAt: z.date().describe('Account creation date'),
   updatedAt: z.date().describe('Last account update date')
 })

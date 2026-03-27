@@ -4,6 +4,9 @@ export interface IUser {
   email: string
   password?: string
   authProvider: string
+  xp: number
+  level: number
+  heroCoins: number
   createdAt: Date
   updatedAt: Date
 }
