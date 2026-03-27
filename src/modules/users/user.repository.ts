@@ -46,13 +46,24 @@ export class UserRepository implements IUserRepository {
       if (!user) return null
 
       if (!returnPassword) {
-        const { ...userWithoutPassword } = user
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+        const { password: _, ...userWithoutPassword } = user
         return userWithoutPassword as IUser
       }
 
       return user as IUser
-    } catch (error) {
-      throw new Error('Error finding user by email: ' + error)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      // eslint-disable-next-line no-console
+      console.error('Error finding user by email:', {
+        email,
+        errorMessage: error.message,
+        code: error.code,
+        detail: error.detail,
+        hint: error.hint,
+        query: error.query
+      })
+      throw new Error(`Error finding user by email: ${error.message}`)
     }
   }
 
@@ -64,16 +75,28 @@ export class UserRepository implements IUserRepository {
 
       if (!user) return null
 
-      const { ...userWithoutPassword } = user
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+      const { password: _, ...userWithoutPassword } = user
       return userWithoutPassword as IUser
-    } catch (error) {
-      throw new Error('Error finding user by ID: ' + error)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      // eslint-disable-next-line no-console
+      console.error('Error finding user by ID:', {
+        id,
+        errorMessage: error.message,
+        code: error.code,
+        detail: error.detail,
+        hint: error.hint,
+        query: error.query
+      })
+      throw new Error(`Error finding user by ID: ${error.message}`)
     }
   }
 
   async findAll(): Promise<IUser[]> {
     try {
       const allUsers = await this.db.query.users.findMany()
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
       return allUsers.map(({ password: _, ...u }) => u as IUser)
     } catch (error) {
       throw new Error('Error finding all users: ' + error)
